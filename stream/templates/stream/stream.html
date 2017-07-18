@@ -13,65 +13,69 @@
 <div id="graph"></div>
 </body>
 <script>
-{#    Use closure to ensure function is called only once#}
-    var startStream = (function() {
-    var executed = false;
-    return function () {
-        if (!executed) {
-            executed = true;
-{#            Find a way to make WebSocket to be called only once. #}
-            var ws = new WebSocket("ws://" + window.location.host + "/");
-        var msg = {
-            stream: "number",
-            payload: {
-                action: "subscribe",
-                pk: "1",
-                data: {
-                    action: "update"
+    {#    Use closure to ensure function is called only once to avoid conflicts #}
+    var startStream = (function () {
+        var executed = false;
+        return function () {
+            if (!executed) {
+                executed = true;
+                {#          TODO: Find a way to make WebSocket to be called only once. #}
+                var ws = new WebSocket("ws://" + window.location.host + "/");
+
+{#                Define ResourceBinding for update on resource with pk= 1 #}
+                var msg = {
+                    stream: "number",
+                    payload: {
+                        action: "subscribe",
+                        pk: "1",
+                        data: {
+                            action: "update"
+                        }
+                    }
+                };
+
+                var randomNumber = 0;
+
+                ws.onmessage = function (e) {
+                    data = JSON.parse(e.data);
+                    console.log(e.data);
+
+{#                    To update randomNumber when data is received from WebSocket. #}
+                    randomNumber = data.payload.data.number;
+                };
+
+                ws.onopen = function () {
+                    ws.send(JSON.stringify(msg));
+                };
+{#              Ajax call to update value on databse for creating a random value #}
+                function rand() {
+                    $.ajax({
+                        url: "{% url 'stream' %}",
+                        type: "POST",
+                        success: function (data) {
+                            console.log("Number Updated via Ajax");
+                        }
+                    });
+                    return randomNumber;
                 }
+
+                Plotly.plot('graph', [{
+                    y: [1, 2, 3].map(rand)
+                }]);
+
+                var cnt = 0;
+
+                var interval = setInterval(function () {
+
+                    Plotly.extendTraces('graph', {
+                        y: [[rand()]]
+                    }, [0])
+
+                    if (cnt === 100) clearInterval(interval);
+                }, 900);
             }
         };
-
-        var randomNumber = 0;
-
-        ws.onmessage = function (e) {
-            data = JSON.parse(e.data);
-            console.log(e.data);
-            randomNumber = data.payload.data.number;
-        };
-
-        ws.onopen = function () {
-            ws.send(JSON.stringify(msg));
-        };
-
-        function rand() {
-            $.ajax({
-                url: "{% url 'stream' %}",
-                type: "POST",
-                success: function (data) {
-                    console.log("Number Updated via Ajax");
-                }
-            });
-            return randomNumber;
-        }
-
-        Plotly.plot('graph', [{
-            y: [1, 2, 3].map(rand)
-        }]);
-
-        var cnt = 0;
-
-        var interval = setInterval(function () {
-
-            Plotly.extendTraces('graph', {
-                y: [[rand()]]
-            }, [0])
-
-            if (cnt === 100) clearInterval(interval);
-        }, 900);
-        }
-    };
-})();
+    })();
 
 </script>
 
