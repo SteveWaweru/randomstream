@@ -164,7 +164,6 @@ fabric.properties
 pyvenv.cfg
 pip-selfcheck.json
 
-.gitignore
 .idea/
 
 */migrations
