@@ -166,3 +166,6 @@ pip-selfcheck.json
 
 .gitignore
 .idea/
+
+*/migrations
+db.sqlite3
