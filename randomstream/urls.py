@@ -20,5 +20,5 @@ from stream.views import stream
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^channels-api/', include('channels_api.urls')),
-    url(r'^$', stream_numbers, name='stream')
+    url(r'^$', stream, name='stream')
 ]
