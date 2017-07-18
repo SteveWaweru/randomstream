@@ -10,6 +10,7 @@ from stream.models import RandomNumber
 
 @csrf_exempt
 def stream(request):
+    # Ajax to update number with a random value
     if request.is_ajax():
         print request
         number = RandomNumber.objects.get(pk=1)
@@ -18,5 +19,6 @@ def stream(request):
         print "number Updated from ajax request"
         return HttpResponse('success')
     if request.method == 'GET':
+        # Create object with pk=1 if not present.
         RandomNumber.objects.get_or_create(pk=1)
         return render(request, 'stream/stream.html')
