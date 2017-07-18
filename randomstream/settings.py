@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgiref.inmemory.ChannelLayer",
-        "ROUTING": "workforce.routing.channel_routing",
+        "ROUTING": "randomstream.routing.channel_routing",
     },
 }
 
