@@ -1,0 +1,68 @@
+{% load staticfiles %}
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>Random Data Stream</h1>
+  <div id="graph"></div>
+</body>
+<script>
+var ws = new WebSocket("ws://" + window.location.host + "/");
+{#var ws = new WebSocket("ws://127.0.0.1:8000/stream/ ");#}
+var msg = {
+  stream: "number",
+  payload: {
+    action: "subscribe",
+    pk: "1",
+    data: {
+      action: "update"
+    }
+  }
+};
+
+var randomNumber = 0;
+
+ws.onmessage = function(e){
+    data = JSON.parse(e.data);
+    console.log(e.data);
+    randomNumber = data.payload.data.number;
+};
+
+ws.onopen = function () {
+    ws.send(JSON.stringify(msg));
+};
+
+function rand() {
+    $.ajax({
+        url: "{% url 'stream' %}",
+        type: "POST",
+        success: function (data) {
+            console.log("Number Updated via Ajax");
+        }
+    });
+  return randomNumber;
+}
+
+Plotly.plot('graph', [{
+  y: [1,2,3].map(rand)
+}]);
+
+var cnt = 0;
+
+var interval = setInterval(function() {
+
+  Plotly.extendTraces('graph', {
+    y: [[rand()]]
+  }, [0])
+
+  if(cnt === 100) clearInterval(interval);
+}, 900);
+</script>
+
+
+</html>
